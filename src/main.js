@@ -75,13 +75,13 @@ function rotateKey(keyNumber, isPressed) {
             //key.roateOnAxis(new THREE.Vector3(1,0,0), 0.002)
             //key.
             //console.log(key.name)
-            key.rotation.x += 0.02;
+            key.rotation.x += 0.015;
             // Check if the key has rotated far enough, and stop if necessary
-            if (key.rotation.x >= .2) {
-                key.rotation.x = .2;
+            if (key.rotation.x >= .15) {
+                key.rotation.x = .15;
             }
         } else {
-            key.rotation.x -= 0.02;
+            key.rotation.x -= 0.015;
             // Check if the key has rotated far enough, and stop if necessary
             if (key.rotation.x <= 0) {
                 key.rotation.x = 0;
