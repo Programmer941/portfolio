@@ -19,14 +19,12 @@ camera.position.set(0,1200,1600)
 camera.rotation.set(-0.73,0,0)
 
 const light = new THREE.AmbientLight( 0x909090 ); // soft white light
-const geometry = new THREE.BoxGeometry( 100, 100, 100 ); 
-const material = new THREE.MeshBasicMaterial( {color: 0x00ff00} ); 
-const cube = new THREE.Mesh( geometry, material ); 
-cube.position.set(0,220,620)
-scene.add( cube );
+
 scene.add( light );
 
 const controls = new OrbitControls( camera, renderer.domElement );
+
+const audio = new Audio("/src/mp3/polka4.mp3");
 
 function animate() {
     if(!window.pianoLoaded && !window.musicLoaded){
@@ -37,7 +35,7 @@ function animate() {
 	renderer.render( scene, camera );
     for (let keyNumber = 0; keyNumber < keys.length; keyNumber++) {
         const isPressed = keys[keyNumber];
-        rotateKey(keyNumber, isPressed);
+        rotateKey(keyNumber, isPressed, velocities[keyNumber]);
     }
 
     //controls.update();
@@ -47,41 +45,56 @@ function animate() {
 }
 
 const keys = new Array(88).fill(false); // Initialize all keys as not pressed
-
+const velocities = new Array(88).fill(0); // Initialize all velocities as 0
 // Event method triggered when a key is pressed or released
 function handleKeyEvent(event) {
     if(event.noteNumber ==null) return;
     //==console.log(event.noteNumber)
     const keyNumber = event.noteNumber; // Get the key number
     const velocity = event.velocity; // Get the velocity
+    //console.log(event)
 
     if (velocity !== 0 && event.name == "Note on") {
         // Key is pressed
         keys[keyNumber] = true;
+        velocities[keyNumber] = velocity;
         //console.log("press")
     } else {
         // Key is released
         keys[keyNumber] = false;
+        velocities[keyNumber] = velocity;
         //console.log("release")
     }
 }
 
-function rotateKey(keyNumber, isPressed) {
+function rotateKey(keyNumber, isPressed, vel) {
     const key = window.keys.children[keyNumber-21]
     //console.log(key,keyNumber)
+    let per = vel/32;
+    if(per==null) per=0;
+    if(isNaN(per)) per=0;
+    per = Math.abs(per);
+    //console.log(per)
+    if(per ==0 && isPressed) console.log("missed note")
     if (key) {
         if (isPressed) {
             // Rotate the key slightly
             //key.roateOnAxis(new THREE.Vector3(1,0,0), 0.002)
             //key.
             //console.log(key.name)
+            if(per==0)
             key.rotation.x += 0.015;
+            else
+            key.rotation.x += 0.015*per;
             // Check if the key has rotated far enough, and stop if necessary
             if (key.rotation.x >= .15) {
                 key.rotation.x = .15;
             }
         } else {
+            if(per==0) 
             key.rotation.x -= 0.015;
+            else
+            key.rotation.x -= 0.015*per;
             // Check if the key has rotated far enough, and stop if necessary
             if (key.rotation.x <= 0) {
                 key.rotation.x = 0;
@@ -119,7 +132,9 @@ const Player = new MidiPlayer.Player(function(event) {
 });
 
 Player.on('fileLoaded', function() {
+
     console.log("loaded");
+
     console.log(window.keys.children);
     //const worldPosition = new THREE.Vector3(0,100,100);
 
@@ -139,15 +154,24 @@ Player.on('playing', function(currentTick) {
     // (this is repeatedly triggered within the play loop)
 });
 
+let started=false;
 Player.on('midiEvent', function(event) {
     handleKeyEvent(event)
+    if(!started){
+        if(event.name == "Note on"){
+            started=true;
+            audio.play();
+            console.log("started")
+        }
+    }
+    //console.log(event)
     // Do something when a MIDI event is fired.
     // (this is the same as passing a function to MidiPlayer.Player() when instantiating.
 });
 
 Player.on('endOfFile', function() {
     console.log("end");
-
+    keys.fill(false);
     // Do something when end of the file has been reached.
 });
 
