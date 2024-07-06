@@ -24,7 +24,7 @@ scene.add( light );
 
 const controls = new OrbitControls( camera, renderer.domElement );
 
-const audio = new Audio("/src/mp3/polka4.mp3");
+const audio = new Audio("/src/mp3/pirate.mp3");
 
 function animate() {
     if(!window.pianoLoaded && !window.musicLoaded){
@@ -53,22 +53,34 @@ function handleKeyEvent(event) {
     const keyNumber = event.noteNumber; // Get the key number
     const velocity = event.velocity; // Get the velocity
     //console.log(event)
+    if(keyNumber-21>60)
+        console.log(keyNumber-21)
 
     if (velocity !== 0 && event.name == "Note on") {
         // Key is pressed
         keys[keyNumber] = true;
         velocities[keyNumber] = velocity;
+        if(!window.keys) return;
+        const key = window.keys.children[keyNumber-21]
+        //key.material.color.setHex(0xff0000)
+        //key.position.y+=0.3
+        console.log(key)
         //console.log("press")
     } else {
         // Key is released
         keys[keyNumber] = false;
         velocities[keyNumber] = velocity;
+        if(!window.keys) return;
+        const key = window.keys.children[keyNumber-21]
+        //key.material.color.setHex(0xffffff)
+        //key.position.y-=0.3
         //console.log("release")
     }
 }
 
 function rotateKey(keyNumber, isPressed, vel) {
     const key = window.keys.children[keyNumber-21]
+
     //console.log(key,keyNumber)
     let per = vel/32;
     if(per==null) per=0;
@@ -82,6 +94,9 @@ function rotateKey(keyNumber, isPressed, vel) {
             //key.roateOnAxis(new THREE.Vector3(1,0,0), 0.002)
             //key.
             //console.log(key.name)
+            if (key.rotation.x >= .15) {
+                key.rotation.x = .15;
+            }else{
             if(per==0)
             key.rotation.x += 0.015;
             else
@@ -90,7 +105,11 @@ function rotateKey(keyNumber, isPressed, vel) {
             if (key.rotation.x >= .15) {
                 key.rotation.x = .15;
             }
+        }
         } else {
+            if (key.rotation.x <= 0) {
+                key.rotation.x = 0;
+            }else{
             if(per==0) 
             key.rotation.x -= 0.015;
             else
@@ -99,6 +118,7 @@ function rotateKey(keyNumber, isPressed, vel) {
             if (key.rotation.x <= 0) {
                 key.rotation.x = 0;
             }
+        }
         // //     // Rotate the key in the opposite direction when released
         //      key.rotation.x -= 0.02;
         // //     // Check if the key has rotated back to its original position, and stop if necessary
@@ -118,6 +138,7 @@ loader.load( './assets/Piano6162024.glb', function ( gltf ) {
     window.piano = gltf.scene
     window.keys= window.piano.children[0].children[0].children[0].children.find(Object => Object.name == "piano_key");
     console.log(gltf.scene)
+    console.log(window.keys)
     window.pianoLoaded=true;
 }, undefined, function ( error ) {
 
