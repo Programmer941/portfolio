@@ -10,7 +10,7 @@ let piano;
 let keys;
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0xf6eedc);
-
+//0xf6eedc
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 10000);
 const renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setPixelRatio(window.devicePixelRatio);
@@ -25,7 +25,7 @@ scene.add(light);
 
 const controls = new OrbitControls(camera, renderer.domElement);
 
-const audio = new Audio("/src/mp3/pirate.mp3");
+const audio = new Audio("/mp3/pirate.mp3");
 
 window.addEventListener('keydown', (event) => {
     console.log(camera.position, camera.rotation, camera.zoom);
@@ -99,7 +99,7 @@ animate();
 
 const loader = new GLTFLoader();
 
-loader.load('./assets/piano7272024.glb', function (gltf) {
+loader.load('/assets/piano7272024.glb', function (gltf) {
     scene.add(gltf.scene);
     piano = gltf.scene;
     keys = piano.children[0].children[0].children[0].children.find(object => object.name === "piano_key");
@@ -128,7 +128,7 @@ Player.on('midiEvent', function (event) {
         if (event.name === "Note on") {
             started = true;
             audio.play();
-            audio.volume = 1;
+            audio.volume = .5;
             console.log("started");
         }
     }
@@ -158,7 +158,7 @@ document.querySelector('input').addEventListener('change', () => {
     });
 });
 
-new RGBELoader().load('/src/hdr/city.hdr', function (texture) {
+new RGBELoader().load('/hdr/city.hdr', function (texture) {
     texture.mapping = THREE.EquirectangularReflectionMapping;
     scene.environment = texture;
     renderer.toneMappingExposure = 0.2;
@@ -174,7 +174,7 @@ function onWindowResize() {
 
 document.getElementById("play").addEventListener("click", () => {
     if (pianoLoaded) {
-        readLocalFile('/src/midi/pirates.mid');
+        readLocalFile('/midi/pirates.mid');
         document.getElementById("play").style.display = "none";
     }
 });
